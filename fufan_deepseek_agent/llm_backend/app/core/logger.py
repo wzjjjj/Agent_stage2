@@ -41,9 +41,8 @@ logger.add(
 )
 
 def get_logger(service: str):
-    """获取带有服务名称的 logger"""
-    return logger.bind(service=service)
+    return logger.bind(service=service, event_type="-")
 
-def log_structured(event_type: str, data: dict):
-    """结构化日志记录"""
-    logger.info({"event_type": event_type, "data": data}) 
+def log_structured(event_type: str, data: dict, service: str | None = None):
+    bound = logger.bind(event_type=event_type) if service is None else logger.bind(service=service, event_type=event_type)
+    bound.info(data) 
