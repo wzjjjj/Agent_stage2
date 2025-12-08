@@ -28,7 +28,7 @@ def setup_logging():
         sys.stdout,
         level="INFO",
         colorize=True,
-        format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level:<8}</level> | svc={extra[service]} | {name}:{function}:{line} - <level>{message}</level>",
+        format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level:<8}</level> | svc={extra[service]} | evt={extra[event_type]} | {name}:{function}:{line} - <level>{message}</level>",
     )
 
     # 普通文件：轮转、保留、压缩，适合人工查看
@@ -40,7 +40,7 @@ def setup_logging():
         level="INFO",
         encoding="utf-8",
         enqueue=True,           # 异步写盘，降低阻塞
-        format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | svc={extra[service]} | {name}:{function}:{line} - {message}",
+        format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level:<8} | svc={extra[service]} | evt={extra[event_type]} | {name}:{function}:{line} - {message}",
     )
 
     # 错误文件：单独记录 ERROR 及以上，便于快速排查
@@ -52,7 +52,7 @@ def setup_logging():
         level="ERROR",
         encoding="utf-8",
         enqueue=True,
-        format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | svc={extra[service]} | {process.id}:{name}:{function}:{line} - {message}",
+        format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level:<8} | svc={extra[service]} | evt={extra[event_type]} | {process.id}:{name}:{function}:{line} - {message}",
     )
 
     # JSON 文件：机器可读的结构化日志   ，适合检索或接入日志系统
@@ -67,10 +67,10 @@ def setup_logging():
 
 def get_logger(service: str):
     """
-    返回绑定了 `service` 上下文的 logger。
-    使用 `logger.bind` 将服务名写入 `extra` 字段，便于在格式中显示或在 JSON 中检索。
+    返回绑定了 `service` 与默认 `event_type` 的 logger。
+    默认为普通日志绑定 `event_type="-"`，避免在格式中引用 `evt={extra[event_type]}` 时出现 KeyError。
     """
-    return logger.bind(service=service)
+    return logger.bind(service=service, event_type="-")
 
 def log_structured(event_type: str, data: dict):
     """
@@ -79,7 +79,8 @@ def log_structured(event_type: str, data: dict):
     - `data` 为事件主体（字典），在 JSON sink 中会完整呈现
     """
     # 绑定事件类型后输出，便于分类检索
-    logger.bind(event_type=event_type).info(data)
+    # 与控制台/文件格式中的 svc 引用保持一致，绑定一个默认的 service，避免 KeyError
+    logger.bind(service="demo", event_type=event_type).info(data)
 
 def main():
     """
