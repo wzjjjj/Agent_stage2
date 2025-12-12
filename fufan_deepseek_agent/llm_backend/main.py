@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, RedirectResponse
 from pydantic import BaseModel
 from typing import List, Dict
 from app.services.llm_factory import LLMFactory
@@ -14,7 +14,6 @@ from app.services.rag_chat_service import RAGChatService
 from app.core.logger import get_logger, log_structured
 from app.core.middleware import LoggingMiddleware
 from app.core.config import settings
-from app.api import api_router
 
 
 # 配置上传目录 - RAG 功能的
@@ -40,8 +39,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 1. 用户注册、登录路由通过 api_router 路由挂载到 /api 前缀
-app.include_router(api_router, prefix="/api")
+@app.get("/login")
+async def redirect_login():
+    return RedirectResponse(url="/")
+
+@app.get("/register")
+async def redirect_register():
+    return RedirectResponse(url="/")
+
+ 
 
 class ReasonRequest(BaseModel):
     messages: List[Dict[str, str]]

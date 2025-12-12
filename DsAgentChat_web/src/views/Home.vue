@@ -36,29 +36,16 @@
         </div>
       </div>
 
-      <!-- 底部个人信息 -->
+      <!-- 底部主题切换 -->
       <div class="user-section">
-        <div class="user-menu" @click.stop="showUserMenu = !showUserMenu">
+        <div class="user-menu" @click.stop="userStore.toggleTheme()">
           <div class="user-avatar">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
-              <circle cx="12" cy="9" r="3" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M17.9691 20C17.81 17.1085 16.9247 15 12 15C7.07527 15 6.18997 17.1085 6.03087 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </div>
-          <span class="user-text">{{ userStore.username }}</span>
-        </div>
-        
-        <!-- 用户菜单 -->
-        <div v-if="showUserMenu" class="user-dropdown">
-          <div class="menu-item" @click="handleLogout">
-            <svg width="16" height="16" viewBox="0 0 16 16">
-              <path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M10 11L14 8L10 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            退出登录
-          </div>
+          <span class="user-text">切换主题</span>
         </div>
       </div>
     </div>
@@ -321,7 +308,6 @@ import { marked, Renderer } from 'marked'
 import DOMPurify from 'dompurify'
 import MarkdownIt from 'markdown-it'
 import { ApiService } from '../services/api'
-import { AuthService } from '../services/api'
 import { useUserStore } from '../stores/user'
 
 interface StreamResponse {
@@ -1094,38 +1080,7 @@ const getFileType = (mimeType: string) => {
   return 'default'
 }
 
-const handleLogout = () => {
-  AuthService.logout()
-}
-
 const userStore = useUserStore()
-const showUserMenu = ref(false)
-
-// 获取用户信息
-onMounted(async () => {
-  try {
-    const response = await AuthService.getUserInfo()
-    userStore.setUserInfo(response)
-  } catch (error) {
-    console.error('Failed to fetch user info:', error)
-  }
-})
-
-// 关闭菜单的点击外部处理
-const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement
-  if (!target.closest('.user-menu')) {
-    showUserMenu.value = false
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
 </script>
 
 <style>
