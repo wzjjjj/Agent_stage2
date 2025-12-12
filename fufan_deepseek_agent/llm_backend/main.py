@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, RedirectResponse
 from pydantic import BaseModel
 from typing import List, Dict
 from app.services.llm_factory import LLMFactory
@@ -38,6 +38,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/login")
+async def redirect_login():
+    return RedirectResponse(url="/")
+
+@app.get("/register")
+async def redirect_register():
+    return RedirectResponse(url="/")
 
  
 
