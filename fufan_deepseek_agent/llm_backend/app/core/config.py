@@ -29,12 +29,12 @@ class Settings(BaseSettings):
     SERPAPI_KEY: str
     SEARCH_RESULT_COUNT: int = 3
     
-    # Database settings
-    DB_HOST: str
-    DB_PORT: int
-    DB_USER: str
-    DB_PASSWORD: str
-    DB_NAME: str
+    # Database settings (optional when auth is disabled)
+    DB_HOST: str | None = None
+    DB_PORT: int | None = None
+    DB_USER: str | None = None
+    DB_PASSWORD: str | None = None
+    DB_NAME: str | None = None
     
     # JWT settings
     SECRET_KEY: str = "your-secret-key"  # 在生产环境中使用安全的密钥
@@ -42,7 +42,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     @property
-    def DATABASE_URL(self) -> str:
+    def DATABASE_URL(self) -> str | None:
+        if not all([self.DB_HOST, self.DB_PORT, self.DB_USER, self.DB_PASSWORD, self.DB_NAME]):
+            return None
         return f"mysql+aiomysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
     
     class Config:
